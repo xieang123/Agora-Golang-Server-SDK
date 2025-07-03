@@ -70,7 +70,7 @@ type RtcConnectionObserver struct {
 	// 1. If set return value to -1, it means the SDK internally does not handle the scenario incompatibility.
 	// 2. If set return value to a valid scenario, it means the SDK internally automatically falls back to the scenario returned, ensuring compatibility.
 	// how to use it: can ref to examples/ai_send_recv_pcm/ai_send_recv_pcm.go
-	OnAIQoSCapabilityMissing   func(con *RtcConnection, defaultFallbackSenario int) int
+	OnAIQoSCapabilityMissing func(con *RtcConnection, defaultFallbackSenario int) int
 }
 
 // struct for local audio track statistics
@@ -362,6 +362,16 @@ type RtcConnectionConfig struct {
 	 * Determines whether to receive video media packet or not.
 	 */
 	VideoRecvMediaPacket bool
+
+	AudioSubsOptions *AudioSubscriptionOptions
+}
+
+type AudioSubscriptionOptions struct {
+	PacketOnly       bool
+	PcmDataOnly      bool
+	BytesPerSample   uint32
+	NumberOfChannels uint32
+	SampleRateHz     uint32
 }
 
 type RtcConnection struct {

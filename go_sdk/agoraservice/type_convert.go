@@ -38,10 +38,10 @@ func CAgoraServiceConfig(cfg *AgoraServiceConfig) *C.struct__agora_service_confi
 	if cfg.LogPath != "" {
 		ret.log_file_path = C.CString(cfg.LogPath)
 	}
-	
+
 	ret.log_file_size_kb = C.uint32_t(cfg.LogSize)
 	ret.log_level = C.int(cfg.LogLevel)
-	
+
 	if cfg.ConfigDir != "" {
 		ret.config_dir = C.CString(cfg.ConfigDir)
 	}
@@ -49,14 +49,13 @@ func CAgoraServiceConfig(cfg *AgoraServiceConfig) *C.struct__agora_service_confi
 		ret.data_dir = C.CString(cfg.DataDir)
 	}
 
-
 	return ret
 }
 
 func FreeCAgoraServiceConfig(cfg *C.struct__agora_service_config) {
 	C.free(unsafe.Pointer(cfg.app_id))
 	if cfg.log_file_path != nil {
-	C.free(unsafe.Pointer(cfg.log_file_path))
+		C.free(unsafe.Pointer(cfg.log_file_path))
 	}
 	if cfg.config_dir != nil {
 		C.free(unsafe.Pointer(cfg.config_dir))
@@ -83,7 +82,15 @@ func CRtcConnectionConfig(cfg *RtcConnectionConfig) *C.struct__rtc_conn_config {
 	ret.max_send_bitrate = C.int(cfg.MaxSendBitrate)
 	ret.min_port = C.int(cfg.MinPort)
 	ret.max_port = C.int(cfg.MaxPort)
-	// ret.audio_subs_options
+	if cfg.AudioSubsOptions != nil {
+		ret.audio_subs_options = C.struct__audio_subscription_options{
+			packet_only:        C.int(cfg.AudioSubsOptions.PacketOnly),
+			pcm_data_only:      C.int(cfg.AudioSubsOptions.PcmDataOnly),
+			bytes_per_sample:   C.uint32_t(cfg.AudioSubsOptions.BytesPerSample),
+			number_of_channels: C.uint32_t(cfg.AudioSubsOptions.NumberOfChannels),
+			sample_rate_hz:     C.uint32_t(cfg.AudioSubsOptions.SampleRateHz),
+		}
+	}
 	ret.client_role_type = C.int(cfg.ClientRole)
 	ret.channel_profile = C.int(cfg.ChannelProfile)
 	ret.audio_recv_media_packet = CIntFromBool(cfg.AudioRecvMediaPacket)
@@ -309,84 +316,82 @@ func GoAudioVolumeInfo(frame *C.struct__audio_volume_info) *AudioVolumeInfo {
 	return ret
 }
 
-
-
 func GoLocalAudioStats(stats *C.struct__local_audio_stats) *LocalAudioTrackStats {
 	ret := &LocalAudioTrackStats{
-		NumChannels: int(stats.num_channels),
+		NumChannels:    int(stats.num_channels),
 		SentSampleRate: int(stats.sent_sample_rate),
-		SentBitrate: int(stats.sent_bitrate),
-		InternalCodec: int(stats.internal_codec),
-		VoicePitch: float64(stats.voice_pitch),
+		SentBitrate:    int(stats.sent_bitrate),
+		InternalCodec:  int(stats.internal_codec),
+		VoicePitch:     float64(stats.voice_pitch),
 	}
 	return ret
 }
 func GoRemoteAudioStats(stats *C.struct__remote_audio_stats) *RemoteAudioTrackStats {
 	ret := &RemoteAudioTrackStats{
-		Uid: uint(stats.uid),
-		Quality: int(stats.quality),
+		Uid:                   uint(stats.uid),
+		Quality:               int(stats.quality),
 		NetworkTransportDelay: int(stats.network_transport_delay),
-		JitterBufferDelay: int(stats.jitter_buffer_delay),
-		AudioLossRate: int(stats.audio_loss_rate),
-		NumChannels: int(stats.num_channels),
-		ReceivedSampleRate: int(stats.received_sample_rate),
-		ReceivedBitrate: int(stats.received_bitrate),
-		TotalFrozenTime: int(stats.total_frozen_time), // ms
-		FrozenRate: int(stats.frozen_rate),
-		MosValue: int(stats.mos_value),
-		TotalActiveTime: int(stats.total_active_time), // ms
-		PublishDuration: int(stats.publish_duration), // ms
+		JitterBufferDelay:     int(stats.jitter_buffer_delay),
+		AudioLossRate:         int(stats.audio_loss_rate),
+		NumChannels:           int(stats.num_channels),
+		ReceivedSampleRate:    int(stats.received_sample_rate),
+		ReceivedBitrate:       int(stats.received_bitrate),
+		TotalFrozenTime:       int(stats.total_frozen_time), // ms
+		FrozenRate:            int(stats.frozen_rate),
+		MosValue:              int(stats.mos_value),
+		TotalActiveTime:       int(stats.total_active_time), // ms
+		PublishDuration:       int(stats.publish_duration),  // ms
 	}
-	return ret	
+	return ret
 }
 func GoLocalVideoStats(stats *C.struct__local_video_track_stats) *LocalVideoTrackStats {
 	ret := &LocalVideoTrackStats{
-		NumberOfStreams: uint64(stats.number_of_streams),
-		BytesMajorStream: uint64(stats.bytes_major_stream),
-		BytesMinorStream: uint64(stats.bytes_minor_stream),
-		FramesEncoded: uint32(stats.frames_encoded),
-		SSRCMajorStream: uint32(stats.ssrc_major_stream),
-		SSRCMinorStream: uint32(stats.ssrc_minor_stream),
-		CaptureFrameRate: int(stats.capture_frame_rate),
+		NumberOfStreams:           uint64(stats.number_of_streams),
+		BytesMajorStream:          uint64(stats.bytes_major_stream),
+		BytesMinorStream:          uint64(stats.bytes_minor_stream),
+		FramesEncoded:             uint32(stats.frames_encoded),
+		SSRCMajorStream:           uint32(stats.ssrc_major_stream),
+		SSRCMinorStream:           uint32(stats.ssrc_minor_stream),
+		CaptureFrameRate:          int(stats.capture_frame_rate),
 		RegulatedCaptureFrameRate: int(stats.regulated_capture_frame_rate),
-		InputFrameRate: int(stats.input_frame_rate),
-		EncodeFrameRate: int(stats.encode_frame_rate),
-		RenderFrameRate: int(stats.render_frame_rate),
-		TargetMediaBitrateBps: int(stats.target_media_bitrate_bps),
-		MediaBitrateBps: int(stats.media_bitrate_bps),
-		TotalBitrateBps: int(stats.total_bitrate_bps),
-		CaptureWidth: int(stats.capture_width),
-		CaptureHeight: int(stats.capture_height),
-		RegulatedCaptureWidth: int(stats.regulated_capture_width),
-		RegulatedCaptureHeight: int(stats.regulated_capture_height),
-		Width: int(stats.width),
-		Height: int(stats.height),
-		EncoderType: uint32(stats.encoder_type),
-		UplinkCostTimeMs: int(stats.uplink_cost_time_ms),
-		QualityAdaptIndication: int(stats.quality_adapt_indication),
+		InputFrameRate:            int(stats.input_frame_rate),
+		EncodeFrameRate:           int(stats.encode_frame_rate),
+		RenderFrameRate:           int(stats.render_frame_rate),
+		TargetMediaBitrateBps:     int(stats.target_media_bitrate_bps),
+		MediaBitrateBps:           int(stats.media_bitrate_bps),
+		TotalBitrateBps:           int(stats.total_bitrate_bps),
+		CaptureWidth:              int(stats.capture_width),
+		CaptureHeight:             int(stats.capture_height),
+		RegulatedCaptureWidth:     int(stats.regulated_capture_width),
+		RegulatedCaptureHeight:    int(stats.regulated_capture_height),
+		Width:                     int(stats.width),
+		Height:                    int(stats.height),
+		EncoderType:               uint32(stats.encoder_type),
+		UplinkCostTimeMs:          int(stats.uplink_cost_time_ms),
+		QualityAdaptIndication:    int(stats.quality_adapt_indication),
 	}
 	return ret
 }
 func GoRemoteVideoStats(stats *C.struct__remote_video_track_stats) *RemoteVideoTrackStats {
 	ret := &RemoteVideoTrackStats{
-		Uid: uint(stats.uid),
-		Delay: int(stats.delay),
-		Width: int(stats.width),
-		Height: int(stats.height),
-		ReceivedBitrate: int(stats.received_bitrate),
-		DecoderOutputFrameRate: int(stats.decoder_output_frame_rate),
+		Uid:                     uint(stats.uid),
+		Delay:                   int(stats.delay),
+		Width:                   int(stats.width),
+		Height:                  int(stats.height),
+		ReceivedBitrate:         int(stats.received_bitrate),
+		DecoderOutputFrameRate:  int(stats.decoder_output_frame_rate),
 		RendererOutputFrameRate: int(stats.renderer_output_frame_rate),
-		FrameLossRate: int(stats.frame_loss_rate),
-		PacketLossRate: int(stats.packet_loss_rate),
-		RxStreamType: int(stats.rx_stream_type),
-		TotalFrozenTime: int(stats.total_frozen_time), // ms
-		FrozenRate: int(stats.frozen_rate),
-		TotalDecodedFrames: uint32(stats.total_decoded_frames),
-		AvSyncTimeMs: int(stats.av_sync_time_ms),
-		DownlinkProcessTimeMs: int(stats.downlink_process_time_ms),
-		FrameRenderDelayMs: int(stats.frame_render_delay_ms),
-		TotalActiveTime: uint64(stats.totalActiveTime), // ms
-		PublishDuration: uint64(stats.publishDuration), // ms
+		FrameLossRate:           int(stats.frame_loss_rate),
+		PacketLossRate:          int(stats.packet_loss_rate),
+		RxStreamType:            int(stats.rx_stream_type),
+		TotalFrozenTime:         int(stats.total_frozen_time), // ms
+		FrozenRate:              int(stats.frozen_rate),
+		TotalDecodedFrames:      uint32(stats.total_decoded_frames),
+		AvSyncTimeMs:            int(stats.av_sync_time_ms),
+		DownlinkProcessTimeMs:   int(stats.downlink_process_time_ms),
+		FrameRenderDelayMs:      int(stats.frame_render_delay_ms),
+		TotalActiveTime:         uint64(stats.totalActiveTime), // ms
+		PublishDuration:         uint64(stats.publishDuration), // ms
 	}
 	return ret
 }
