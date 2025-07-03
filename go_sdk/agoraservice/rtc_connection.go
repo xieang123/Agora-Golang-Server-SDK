@@ -367,8 +367,8 @@ type RtcConnectionConfig struct {
 }
 
 type AudioSubscriptionOptions struct {
-	PacketOnly       bool
-	PcmDataOnly      bool
+	PacketOnly       int
+	PcmDataOnly      int
 	BytesPerSample   uint32
 	NumberOfChannels uint32
 	SampleRateHz     uint32
